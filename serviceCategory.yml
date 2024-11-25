@@ -95,7 +95,7 @@ x-service:
       - store: message
       - store: filePath
     s3:
-      bucket: celta-reports-public-stic-dev
+      bucket: your-s3-bucket-name
       action: upload
       fileKey:
         timestamp: "${timestamp}"
