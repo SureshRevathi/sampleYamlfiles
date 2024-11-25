@@ -1,0 +1,117 @@
+openapi: 3.0.1
+info:
+  title: CreateServiceCategory
+  description: API to create a service category and store associated details in MSD.
+  version: 1.0.0
+servers:
+  - url: 'https://finx-celta-api-dev.fincuro.in'
+paths:
+  /service-category/create:
+    post:
+      summary: Create a service category and upload a file to S3 bucket.
+      operationId: CreateServiceCategory
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  description: The category of the service.
+                subcategory:
+                  type: string
+                  description: The subcategory of the service.
+                requesttype:
+                  type: string
+                  description: The type of request being made.
+                message:
+                  type: string
+                  description: The message or description for the service category.
+                file:
+                  type: string
+                  format: binary
+                  description: The file to be uploaded (in file format), to be stored in S3 bucket.
+              required:
+                - category
+                - subcategory
+                - requesttype
+                - message
+                - file
+      responses:
+        '200':
+          description: Service category created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categoryId:
+                    type: string
+                    description: The unique ID for the created service category.
+                  s3FilePath:
+                    type: string
+                    description: The S3 path of the uploaded file.
+                  category:
+                    type: string
+                    description: The category of the service.
+                  subcategory:
+                    type: string
+                    description: The subcategory of the service.
+                  requesttype:
+                    type: string
+                    description: The type of request.
+                  message:
+                    type: string
+                    description: The message/description for the category.
+        '400':
+          description: Invalid request or data error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message detailing what went wrong.
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message detailing what went wrong.
+
+x-service:
+  name: ServiceCategoryService
+  description: Service handling creation of service categories and storing them in MSD.
+  logic:
+    storeInMSD:
+      - store: category
+      - store: subcategory
+      - store: requesttype
+      - store: message
+      - store: filePath
+    s3:
+      bucket: your-s3-bucket-name
+      action: upload
+      fileKey:
+        timestamp: "${timestamp}"
+      retrieve: true
+
+x-technical-metadata:
+  event_id: "${unique-event-id}"
+  timestamp: "${timestamp}"
+  vault_version:
+    major: 5
+    minor: 3
+    patch: 5
+    label: ""
+
+x-update-mask:
+  paths:
+    - "api"
+    - "service"
+    - "technical_metadata"
